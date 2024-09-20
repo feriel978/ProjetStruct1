@@ -30,7 +30,7 @@ jobs:
           ~/sfdx/bin/sfdx version
       - name: Authenticate to org with JWT
         run: >-
-          echo ${{secrets.SF_sESECURITY_TOKEN }} > server.key
+          echo ${{secrets.SF_SECURITY_TOKEN}} > server.key
 
           sfdx force:auth:jwt:grant --clientid=${{secrets.SF_CONSUMER_KEY}} --jwtkeyfile=server.key --username=${{secrets.SF_USERNAME}} -s -a targetOrg --instanceurl=${{secrets.SF_login_URL}}
       - name: Run all tests
