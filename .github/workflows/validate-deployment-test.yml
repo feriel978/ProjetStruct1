@@ -32,6 +32,6 @@ jobs:
         run: >-
           echo ${{secrets.SF_SECURITY_TOKEN}} > server.key
 
-          sfdx force:auth:jwt:grant --clientid=${{secrets.SF_CONSUMER_KEY}} --jwtkeyfile=server.key --username=${{secrets.SF_USERNAME}} -s -a targetOrg --instanceurl=${{secrets.SF_login_URL}}
+          sfdx force:auth:jwt:grant --client-id=${{secrets.SF_CONSUMER_KEY}} --jwt-key-file=server.key --username=${{secrets.SF_USERNAME}} -s -a targetOrg --instance-url=${{secrets.SF_login_URL}}
       - name: Run all tests
         run: sfdx force:apex:test:run -l RunLocalTests -c -r human
