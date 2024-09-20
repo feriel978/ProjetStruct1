@@ -12,31 +12,27 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: "14"
+      
       - name: Checkout source code
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      
       - name: Install Salesforce CLI
-        run: >
-          wget
-          https://developer.salesforce.com/media/salesforce-cli/sfdx/channels/stable/sfdx-linux-x64.tar.xz
-
+        run: |
+          wget https://developer.salesforce.com/media/salesforce-cli/sfdx/channels/stable/sfdx-linux-x64.tar.xz
           mkdir ~/sfdx
-
           tar xJf sfdx-linux-x64.tar.xz -C ~/sfdx --strip-components 1
-
           echo "$HOME/sfdx/bin" >> $GITHUB_PATH
-
           ~/sfdx/bin/sfdx version
+      
       - name: Authenticate to org with JWT
-       env:
-        SF_USERNAME: ${{ secrets.SF_USERNAME }}
-        SF_PASSWORD: ${{ secrets.SF_PASSWORD }}${{ secrets.SF_SECURITY_TOKEN }}
-        run: >-
+        env:
+          SF_USERNAME: ${{ secrets.SF_USERNAME }}
+          SF_PASSWORD: ${{ secrets.SF_PASSWORD }}${{ secrets.SF_SECURITY_TOKEN }}
+        run: |
           echo "Authenticating to Salesforce..."
           echo $SF_PASSWORD | sfdx force:auth:password:grant --username $SF_USERNAME --setdefaultdevhubusername
-          
+      
       - name: Run all tests
         run: sfdx force:apex:test:run -l RunLocalTests -c -r human
-
-      
