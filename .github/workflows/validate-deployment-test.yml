@@ -35,7 +35,7 @@ jobs:
         run: >-
           echo "Authenticating to Salesforce..."
           echo $SF_PASSWORD | sfdx force:auth:password:grant --username $SF_USERNAME --setdefaultdevhubusername
- 
+          
       - name: Run all tests
         run: sfdx force:apex:test:run -l RunLocalTests -c -r human
 
