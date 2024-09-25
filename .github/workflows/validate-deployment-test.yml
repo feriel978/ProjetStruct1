@@ -41,7 +41,7 @@ jobs:
               
               # Authorize devops user
             - name: 'Authorize Devops User'
-              run: sfdx force:auth:jwt:grant -i "3MVG9PwZx9R6_Urcm_cf4vtX9WGI07E58exJE_UbCpHtSzO7mMwNJfJh64Kt_.yZEnKW1ZitVUzpvouU7eLXB" -f JWT/server.key -a feriel.abalache@resourceful-narwhal-bjgqg8.com --username Ferielab@Force.com
+              run: sfdx force:auth:jwt:grant -i "3MVG9PwZx9R6_Urcm_cf4vtX9WGI07E58exJE_UbCpHtSzO7mMwNJfJh64Kt_.yZEnKW1ZitVUzpvouU7eLXB" -f JWT/server.key -a Ferielab@Force.com --username feriel.abalache@resourceful-narwhal-bjgqg8.com
               
             # Deploy the entire branch to Integration org
             - name: 'Deploy the release to UAT org'
