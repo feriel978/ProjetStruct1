@@ -1,7 +1,7 @@
 name: Validate deployment test
 on:
   push:
-    paths:
+    paths: 
       - force-app/**
     branches:
       - dev
