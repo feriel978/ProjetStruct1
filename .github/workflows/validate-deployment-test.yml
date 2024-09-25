@@ -41,12 +41,12 @@ jobs:
               
               # Authorize devops user
             - name: 'Authorize Devops User'
-              run: sfdx force:auth:jwt:grant -i "00DWU000008m8uj!AQEAQNrJTryBWDSCouEe8pS.4V5mty2OXw9F4wlSjTXDOry.c7Pm06qpPIDHV5KQfVfvxWOJtn.ozGkdgrEHkSrFgRDJuN2r" -f JWT/server.key -a RimowaUATOrg --username Ferielab@Force.com
+              run: sfdx force:auth:jwt:grant -i "3MVG9PwZx9R6_Urcm_cf4vtX9WGI07E58exJE_UbCpHtSzO7mMwNJfJh64Kt_.yZEnKW1ZitVUzpvouU7eLXB" -f JWT/server.key -a feriel.abalache@resourceful-narwhal-bjgqg8.com --username Ferielab@Force.com
               
             # Deploy the entire branch to Integration org
             - name: 'Deploy the release to UAT org'
               
 
-              run: sfdx force:source:deploy -x "unpackaged/projectManifest/manifestHelloWorld.xml" -u RimowaUATOrg
+              run: sfdx force:source:deploy -x "unpackaged/projectManifest/manifestHelloWorld.xml" -u feriel.abalache@resourceful-narwhal-bjgqg8.com
 
               #run:  sfdx force:source:deploy -x "unpackaged/projectManifest/packageSom-2023-12-1.xml" --testlevel RunSpecifiedTests --runtests $(cat unpackaged/projectManifest/specifiedTestsClass/testsToRun-12.1.txt) -u RimowaUATOrg --json
