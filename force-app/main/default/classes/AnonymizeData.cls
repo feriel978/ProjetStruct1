@@ -1,8 +1,15 @@
+/**
+ * @description       : 
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             : 
+ * @last modified on  : 10-08-2024
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+**/
 
 global class AnonymizeData implements Database.Batchable<SObject> {
     
     // Method to retrieve the key from the custom object
-    private String getAnonymizationKey() {
+    private String getAnonymiztionKey() {
         Crypt_key_storage__c keyStorage = [SELECT Key__c FROM Crypt_key_storage__c LIMIT 1];
         return keyStorage != null ? keyStorage.Key__c : null;
     }
@@ -10,7 +17,7 @@ global class AnonymizeData implements Database.Batchable<SObject> {
     // Start method
     global Database.QueryLocator start(Database.BatchableContext BC) {
         // Query to select records that need anonymization, for example, from a custom object
-        return Database.getQueryLocator('SELECT Id,Email,MobilePhone ,FirstName ,LastName FROM contact WHERE LastName = '+'Gonzalez');
+        return Database.getQueryLocator('SELECT Id,MiddelName,Email,MobilePhone ,FirstName ,LastName FROM contact WHERE LastName = '+'Gonzalez');
     }
 
     // Execute method
