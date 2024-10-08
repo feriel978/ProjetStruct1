@@ -27,9 +27,6 @@ jobs:
         wget https://github.com/pmd/pmd/releases/download/pmd_releases/6.47.0/pmd-bin-6.47.0.zip
         # Dézipper le fichier téléchargé
         unzip pmd-bin-6.47.0.zip
-        # Lister le contenu du répertoire PMD pour vérifier l'emplacement de l'exécutable
-        ls -la pmd-bin-6.47.0
-        ls -la pmd-bin-6.47.0/bin  # Lister le contenu du dossier bin
         # Ajouter le chemin PMD à la variable PATH
         echo "PMD_PATH=$(pwd)/pmd-bin-6.47.0/bin" >> $GITHUB_ENV
 
@@ -37,7 +34,7 @@ jobs:
     - name: Exécuter PMD
       run: |
         # Utiliser la variable d'environnement PMD_PATH pour exécuter PMD
-        $PMD_PATH/pmd-6.47.0/pmd -d force-app/main/default/apexRulesets -R MyRuleset.ruleset -f text > pmd-report.txt
+        $GITHUB_ENV/pmd -d force-app/main/default/apexRulesets -R MyRuleset.ruleset -f text > pmd-report.txt
       continue-on-error: true  # Permet de continuer même si l'analyse échoue
 
 
