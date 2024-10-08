@@ -17,7 +17,7 @@ global class AnonymizeData implements Database.Batchable<SObject> {
     // Start method
     global Database.QueryLocator start(Database.BatchableContext BC) {
         // Query to select records that need anonymization, for example, from a custom object
-        return Database.getQueryLocator('SELECT Id,MiddelName,Email,MobilePhone ,FirstName ,LastName FROM contact WHERE LastName = '+'Gonzalez');
+        return Database.getQueryLocator('SELECT Id,Email,MobilePhone ,FirstName ,LastName FROM contact WHERE LastName = '+'Gonzalez');
     }
 
     // Execute method
