@@ -34,7 +34,7 @@ jobs:
     - name: Exécuter PMD
       run: |
         # Utiliser la variable d'environnement PMD_PATH pour exécuter PMD
-        $GITHUB_ENV/pmd -d force-app/main/default/apexRulesets -R MyRuleset.ruleset -f text > pmd-report.txt
+        $PMD_PATH/pmd -d force-app/main/default/apexRulesets -R MyRuleset.ruleset -f text > pmd-report.txt
       continue-on-error: true  # Permet de continuer même si l'analyse échoue
 
 
