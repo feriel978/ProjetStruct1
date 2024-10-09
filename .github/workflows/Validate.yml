@@ -1,4 +1,4 @@
-name: Analyse PMD et Déploiement Salesforce
+name: Validate
 
 on:
   push:
