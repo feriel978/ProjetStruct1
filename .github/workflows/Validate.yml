@@ -29,12 +29,12 @@ jobs:
         unzip pmd-bin-6.47.0.zip
         # Ajouter le chemin PMD à la variable PATH
         echo "PMD_PATH=$(pwd)/pmd-bin-6.47.0/bin" >> $GITHUB_ENV
-
+        echo "$PATH" # Optional: Print the PATH for debugging
     # Étape 4 : Exécuter l'analyse PMD
     - name: Exécuter PMD
       run: |
-        # Utiliser la variable d'environnement PMD_PATH pour exécuter PMD
-        $PMD_PATH/pmd -d force-app/main/default/apexRulesets -R MyRuleset.ruleset -f text > pmd-report.txt
+        export PATH="$PATH:$(pwd)/pmd-bin-6.47.0/bin" # Ensure PATH is set here as well
+        pmd -d force-app/main/default/classes/ -R apex-ruleset.xml -f text > pmd-report.txt
       continue-on-error: true  # Permet de continuer même si l'analyse échoue
 
 
