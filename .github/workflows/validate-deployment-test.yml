@@ -18,7 +18,7 @@ jobs:
 
     steps:
       # Step 1: Setup Node.js with a compatible version (18.18.0 or above)
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: "20.0.0"  # Ensure Node.js is updated to the compatible version
 
