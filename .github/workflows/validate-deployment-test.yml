@@ -22,7 +22,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-      
+
       # Step 3: Install Salesforce CLI (SFDX)
       - name: 'Install Salesforce CLI'
         run: |
@@ -42,20 +42,22 @@ jobs:
         run: |
           echo ${{ secrets.SFDX_URL_CI_SECRET }} > ./SFDX_URL_CI_SECRET.txt
           sfdx auth:sfdxurl:store -f ./SFDX_URL_CI_SECRET.txt -s -a targetOrg
-        - name: Set Environment Variables
-          run: |
-            export SF_LAZY_LOAD_MODULES=true
-            export SF_AUTOUPDATE_DISABLE=true
-            export SF_DISABLE_AUTOUPDATE=true
-        
-      # Step 6: Run Salesforce Scanner
+
+      # Step 6: Set Environment Variables
+      - name: Set Environment Variables
+        run: |
+          export SF_LAZY_LOAD_MODULES=true
+          export SF_AUTOUPDATE_DISABLE=true
+          export SF_DISABLE_AUTOUPDATE=true
+
+      # Step 7: Run Salesforce Scanner
       - name: Run Salesforce Scanner
         run: |
           sfdx scanner:run --format sarif --target 'force-app/**/*.cls' \
             --category 'Security,Code Style,Performance,Best Practices,Design' \
             --outfile 'apexScanResults.sarif'
 
-      # Step 7: Upload SARIF file as an artifact
+      # Step 8: Upload SARIF file as an artifact
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v1
         with:
