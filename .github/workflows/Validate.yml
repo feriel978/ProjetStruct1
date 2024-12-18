@@ -1,3 +1,7 @@
+on:
+  push:
+    branches:
+      - main 
 jobs:
   sfdx-scanner-analysis:
     runs-on: ubuntu-latest
