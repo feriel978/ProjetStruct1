@@ -1,7 +1,9 @@
+# Definition when the workflow should run
 on:
   push:
     branches:
-      - main 
+      - "main"
+
 jobs:
   sfdx-scanner-analysis:
     runs-on: ubuntu-latest
@@ -11,7 +13,7 @@ jobs:
     - name: Checkout the repository
       uses: actions/checkout@v2
 
-    # Step 2: Set up Node.js with a compatible version (18.18.0 or higher)
+    # Step 2: Set up Node.js with a compatible version
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
