@@ -41,12 +41,12 @@ jobs:
           echo "SF_AUTOUPDATE_DISABLE=true" >> $GITHUB_ENV
           echo "SF_DISABLE_AUTOUPDATE=true" >> $GITHUB_ENV
 
-      # Step 6: Run Salesforce Scanner with no bail flag
+      # Step 6: Run Salesforce Scanner without --no-bail flag
       - name: Run Salesforce Scanner
         run: |
           sfdx scanner:run --format sarif --target 'force-app/**/*.cls' \
             --category 'Security,Code Style,Performance,Best Practices,Design' \
-            --outfile 'apexScanResults.sarif' --no-bail
+            --outfile 'apexScanResults.sarif'
 
       # Step 7: Upload SARIF file as an artifact
       - name: Upload SARIF file
