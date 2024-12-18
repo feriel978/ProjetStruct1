@@ -20,7 +20,7 @@ jobs:
       # Step 1: Setup Node.js with a compatible version (18.18.0 or above)
       - uses: actions/setup-node@v3
         with:
-          node-version: "18.18.0"  # Ensure Node.js is updated to the compatible version
+          node-version: "20.0.0"  # Ensure Node.js is updated to the compatible version
 
       # Step 2: Checkout the repository
       - name: Checkout source code
