@@ -10,15 +10,9 @@ jobs:
     steps:
     # Step 1: Checkout the repository
     - name: Checkout the repository
-      uses: actions/checkout@v3  # Updated to the latest version (v3)
+      uses: actions/checkout@v2
 
-    # Step 2: Set up Node.js
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18.x'  # Ensure compatibility with Node.js versions for Salesforce tools
-
-    # Step 3: Install Salesforce CLI (SFDX)
+    # Step 2: Install Salesforce CLI (SFDX)
     - name: Install Salesforce CLI
       run: |
         wget https://developer.salesforce.com/media/salesforce-cli/sfdx/channels/stable/sfdx-linux-x64.tar.xz
@@ -27,30 +21,30 @@ jobs:
         echo "$HOME/sfdx/bin" >> $GITHUB_PATH
         ~/sfdx/bin/sfdx version
 
-    # Step 4: Install Salesforce Scanner plugin (SFDX Scanner)
+    # Step 3: Install Salesforce Scanner plugin (SFDX Scanner)
     - name: Install SFDX Scanner
       run: sfdx plugins:install @salesforce/sfdx-scanner
 
-    # Step 5: Authenticate to Salesforce Org (using SFDX URL from secrets)
+    # Step 4: Authenticate to Salesforce Org (using SFDX URL from secrets)
     - name: Authenticate to target Salesforce Org
       run: |
         echo ${{ secrets.SFDX_URL_CI_SECRET }} > ./SFDX_URL_CI_SECRET.txt
         sfdx auth:sfdxurl:store -f ./SFDX_URL_CI_SECRET.txt -s -a targetOrg
 
-    # Step 6: Run the Salesforce Scanner on the code (Apex, LWC, etc.)
+    # Step 5: Run the Salesforce Scanner on the code (Apex, LWC, etc.)
     - name: Run Salesforce Scanner
       run: |
         sfdx scanner:run --format sarif --target 'force-app/**/*.cls' \
           --category 'Security,Code Style,Performance,Best Practices,Design' \
           --outfile 'apexScanResults.sarif'
 
-    # Step 7: Upload SARIF file as an artifact
+    # Step 6: Upload SARIF file as an artifact
     - name: Upload SARIF file
       uses: github/codeql-action/upload-sarif@v1
       with:
         sarif_file: apexScanResults.sarif
 
-    # Step 8: Optionally, deploy code and run tests (if required)
+    # Step 7: Optionally, deploy code and run tests (if required)
     - name: Deployment - run specified tests (if APEX_TESTS is set)
       if: ${{ env.APEX_TESTS != 'all' }}
       run: |
