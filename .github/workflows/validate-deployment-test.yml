@@ -1,61 +1,57 @@
 # Unique name for this workflow
-
-
+name: Salesforce SFDX Scanner Analysis
 
 # Definition when the workflow should run
 on:
-    push:
-      branches:
-        - "main"
-    
- jobs:
+  push:
+    branches:
+      - "main"
+
+jobs:
   sfdx-scanner-analysis:
     runs-on: ubuntu-latest
 
     steps:
-    # Step 1: Checkout the repository
-    - name: Checkout the repository
-      uses: actions/checkout@v2
+      # Step 1: Checkout the repository
+      - name: Checkout the repository
+        uses: actions/checkout@v2
 
-    # Step 2: Install Node.js using nvm (Ensure using a compatible version)
-    # Install nodejs in the VM, and specify version 20
-    - name: 'Install NodeJS'
-    uses: actions/setup-node@v4
-    with:
-        node-version: '20'
-     
+      # Step 2: Install Node.js using nvm (Ensure using a compatible version)
+      # Install nodejs in the VM, and specify version 20
+      - name: 'Install NodeJS'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      # Step 3: Install Salesforce CLI (SFDX)
+      - name: 'Install Salesforce CLI'
+        run: |
+          npm install sfdx-cli --global
 
-    # Step 3: Install Salesforce CLI (SFDX)
-    # Install Salesforce CLI
-    # Install Salesforce CLI
-    - name: 'Install Salesforce CLI'
-    run: |
-        npm install sfdx-cli --global
+      # Step 4: Install SFDX Scanner plugin
+      - name: Install SFDX Scanner
+        run: |
+          # Clean npm/yarn cache to avoid potential conflicts
+          npm cache clean --force
+          yarn cache clean
+          # Install the plugin
+          sfdx plugins:install @salesforce/sfdx-scanner
 
-    # Step 4: Install SFDX Scanner plugin
-    - name: Install SFDX Scanner
-      run: |
-        # Clean npm/yarn cache to avoid potential conflicts
-        npm cache clean --force
-        yarn cache clean
-        # Install the plugin
-        sfdx plugins:install @salesforce/sfdx-scanner
+      # Step 5: Authenticate to Salesforce Org (using SFDX URL from secrets)
+      - name: Authenticate to target Salesforce Org
+        run: |
+          echo ${{ secrets.SFDX_URL_CI_SECRET }} > ./SFDX_URL_CI_SECRET.txt
+          sfdx auth:sfdxurl:store -f ./SFDX_URL_CI_SECRET.txt -s -a targetOrg
 
-    # Step 5: Authenticate to Salesforce Org (using SFDX URL from secrets)
-    - name: Authenticate to target Salesforce Org
-      run: |
-        echo ${{ secrets.SFDX_URL_CI_SECRET }} > ./SFDX_URL_CI_SECRET.txt
-        sfdx auth:sfdxurl:store -f ./SFDX_URL_CI_SECRET.txt -s -a targetOrg
+      # Step 6: Run Salesforce Scanner
+      - name: Run Salesforce Scanner
+        run: |
+          sfdx scanner:run --format sarif --target 'force-app/**/*.cls' \
+            --category 'Security,Code Style,Performance,Best Practices,Design' \
+            --outfile 'apexScanResults.sarif'
 
-    # Step 6: Run Salesforce Scanner
-    - name: Run Salesforce Scanner
-      run: |
-        sfdx scanner:run --format sarif --target 'force-app/**/*.cls' \
-          --category 'Security,Code Style,Performance,Best Practices,Design' \
-          --outfile 'apexScanResults.sarif'
-
-    # Step 7: Upload SARIF file as an artifact
-    - name: Upload SARIF file
-      uses: github/codeql-action/upload-sarif@v1
-      with:
-        sarif_file: apexScanResults.sarif
+      # Step 7: Upload SARIF file as an artifact
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: apexScanResults.sarif
