@@ -17,7 +17,7 @@ jobs:
     if: ${{ github.actor != 'dependabot[bot]' }}
 
     steps:
-      # Step 1: Setup Node.js with a compatible version (18.18.0 or >=20.0.0)
+      # Step 1: Setup Node.js with a compatible version (18.18.0 or above)
       - uses: actions/setup-node@v3
         with:
           node-version: "18.18.0"  # Ensure Node.js is updated to the compatible version
@@ -62,11 +62,10 @@ jobs:
       - name: Installing java
         run: sudo apt-get update && sudo apt-get install default-jdk
 
-      # Step 9: Install the SFDX scanner plugin for security and code style checks
+      # Step 9: Install the SFDX scanner plugin for security and code style checks using npm
       - name: Installing SFDX scanner
         run: |
-          sfdx plugins:install @salesforce/sfdx-scanner || true
-          yarn add @salesforce/sfdx-scanner || true  # Use yarn as a fallback to install the plugin
+          npm install @salesforce/sfdx-scanner@latest --save-dev || true  # Using npm to install the scanner
 
       # Step 10: Run the SFDX scanner to analyze Apex code and generate SARIF report
       - name: Scan code
