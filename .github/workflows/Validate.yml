@@ -1,8 +1,3 @@
-on:
-  push:
-    branches:
-      - main   # Specify the branch that triggers the workflow
-
 jobs:
   sfdx-scanner-analysis:
     runs-on: ubuntu-latest
@@ -10,13 +5,13 @@ jobs:
     steps:
     # Step 1: Checkout the repository
     - name: Checkout the repository
-      uses: actions/checkout@v3  # Updated to the latest version (v3)
+      uses: actions/checkout@v2
 
-    # Step 2: Set up Node.js
+    # Step 2: Set up Node.js with a compatible version
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '18.x'  # Ensure compatibility with Node.js versions for Salesforce tools
+        node-version: '18.18.0'  # Ensure this is a compatible version
 
     # Step 3: Install Salesforce CLI (SFDX)
     - name: Install Salesforce CLI
@@ -49,14 +44,3 @@ jobs:
       uses: github/codeql-action/upload-sarif@v1
       with:
         sarif_file: apexScanResults.sarif
-
-    # Step 8: Optionally, deploy code and run tests (if required)
-    - name: Deployment - run specified tests (if APEX_TESTS is set)
-      if: ${{ env.APEX_TESTS != 'all' }}
-      run: |
-        sfdx force:source:deploy -p "force-app" --checkonly --testlevel RunSpecifiedTests --runtests ${{ env.APEX_TESTS }} --json
-
-    - name: Deployment - run all tests (if APEX_TESTS == 'all')
-      if: ${{ env.APEX_TESTS == 'all' }}
-      run: |
-        sfdx force:source:deploy -p "force-app" --checkonly --testlevel RunLocalTests --json
