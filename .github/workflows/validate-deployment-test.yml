@@ -1,7 +1,5 @@
-# Unique name for this workflow
 name: Salesforce SFDX Scanner Analysis
 
-# Definition when the workflow should run
 on:
   push:
     branches:
@@ -17,7 +15,6 @@ jobs:
         uses: actions/checkout@v2
 
       # Step 2: Install Node.js using nvm (Ensure using a compatible version)
-      # Install nodejs in the VM, and specify version 20
       - name: 'Install NodeJS'
         uses: actions/setup-node@v4
         with:
@@ -37,25 +34,24 @@ jobs:
           # Install the plugin
           sfdx plugins:install @salesforce/sfdx-scanner
 
-      # Step 5: Authenticate to Salesforce Org (using SFDX URL from secrets)
-      - name: Authenticate to target Salesforce Org
-        run: |
-          echo ${{ secrets.SFDX_URL_CI_SECRET }} > ./SFDX_URL_CI_SECRET.txt
-          sfdx auth:sfdxurl:store -f ./SFDX_URL_CI_SECRET.txt -s -a targetOrg
-
-      # Step 6: Set Environment Variables
+      # Step 5: Set environment variables for Salesforce CLI
       - name: Set Environment Variables
         run: |
-          export SF_LAZY_LOAD_MODULES=true
-          export SF_AUTOUPDATE_DISABLE=true
-          export SF_DISABLE_AUTOUPDATE=true
+          echo "SF_LAZY_LOAD_MODULES=true" >> $GITHUB_ENV
+          echo "SF_AUTOUPDATE_DISABLE=true" >> $GITHUB_ENV
+          echo "SF_DISABLE_AUTOUPDATE=true" >> $GITHUB_ENV
 
-      # Step 7: Run Salesforce Scanner
+      # Step 6: Update Salesforce CLI
+      - name: Update Salesforce CLI
+        run: |
+          sfdx update
+
+      # Step 7: Run Salesforce Scanner with no bail flag
       - name: Run Salesforce Scanner
         run: |
           sfdx scanner:run --format sarif --target 'force-app/**/*.cls' \
             --category 'Security,Code Style,Performance,Best Practices,Design' \
-            --outfile 'apexScanResults.sarif'
+            --outfile 'apexScanResults.sarif' --no-bail
 
       # Step 8: Upload SARIF file as an artifact
       - name: Upload SARIF file
