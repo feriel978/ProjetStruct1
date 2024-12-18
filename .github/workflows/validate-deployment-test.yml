@@ -42,7 +42,12 @@ jobs:
         run: |
           echo ${{ secrets.SFDX_URL_CI_SECRET }} > ./SFDX_URL_CI_SECRET.txt
           sfdx auth:sfdxurl:store -f ./SFDX_URL_CI_SECRET.txt -s -a targetOrg
-
+        - name: Set Environment Variables
+          run: |
+            export SF_LAZY_LOAD_MODULES=true
+            export SF_AUTOUPDATE_DISABLE=true
+            export SF_DISABLE_AUTOUPDATE=true
+        
       # Step 6: Run Salesforce Scanner
       - name: Run Salesforce Scanner
         run: |
