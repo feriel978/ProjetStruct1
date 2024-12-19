@@ -8,7 +8,7 @@ on:
     paths:
       - force-app/**
     branches:
-      - 'Release-Candidate'
+      - 'dev'
       - 'Main'
 
 jobs:
