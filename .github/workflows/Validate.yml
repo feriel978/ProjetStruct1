@@ -1,52 +1,94 @@
-# Definition when the workflow should run
+name: Automatic PR Validation
 on:
-  push:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - closed
+    paths:
+      - force-app/**
     branches:
-      - "main"
+      - 'dev'
+      - 'Main'
 
 jobs:
-  sfdx-scanner-analysis:
+  automatic-pr-validation:
     runs-on: ubuntu-latest
+    if: ${{ github.actor != 'dependabot[bot]' }}
 
     steps:
-    # Step 1: Checkout the repository
-    - name: Checkout the repository
-      uses: actions/checkout@v2
+      # Step 1: Setup Node.js with a compatible version (18.18.0 or above)
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"  # Ensure Node.js is updated to the compatible version
 
-    # Step 2: Set up Node.js with a compatible version
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18.18.0'  # Ensure this is a compatible version
+      # Step 2: Checkout the repository
+      - name: Checkout source code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
-    # Step 3: Install Salesforce CLI (SFDX)
-    - name: Install Salesforce CLI
-      run: |
-        wget https://developer.salesforce.com/media/salesforce-cli/sfdx/channels/stable/sfdx-linux-x64.tar.xz
-        mkdir ~/sfdx
-        tar xJf sfdx-linux-x64.tar.xz -C ~/sfdx --strip-components 1
-        echo "$HOME/sfdx/bin" >> $GITHUB_PATH
-        ~/sfdx/bin/sfdx version
+      # Step 3: Install Salesforce CLI
+      - name: Install Salesforce CLI
+        run: |
+          wget https://developer.salesforce.com/media/salesforce-cli/sfdx/channels/stable/sfdx-linux-x64.tar.xz
+          mkdir ~/sfdx
+          tar xJf sfdx-linux-x64.tar.xz -C ~/sfdx --strip-components 1
+          echo "$HOME/sfdx/bin" >> $GITHUB_PATH
+          ~/sfdx/bin/sfdx version
 
-    # Step 4: Install Salesforce Scanner plugin (SFDX Scanner)
-    - name: Install SFDX Scanner
-      run: sfdx plugins:install @salesforce/sfdx-scanner
+      # Step 4: Populate the auth file with the Salesforce URL secret for authentication
+      - name: Populate auth file with SFDX_URL secret of target org
+        run: |
+          echo ${{ secrets.SFDX_URL_CI_SECRET }} > ./SFDX_URL_CI_SECRET.txt
 
-    # Step 5: Authenticate to Salesforce Org (using SFDX URL from secrets)
-    - name: Authenticate to target Salesforce Org
-      run: |
-        echo ${{ secrets.SFDX_URL_CI_SECRET }} > ./SFDX_URL_CI_SECRET.txt
-        sfdx auth:sfdxurl:store -f ./SFDX_URL_CI_SECRET.txt -s -a targetOrg
+      # Step 5: Authenticate to the Salesforce Org
+      - name: Authenticate to target Org
+        run: sfdx auth:sfdxurl:store -f ./SFDX_URL_CI_SECRET.txt -s -a targetOrg
 
-    # Step 6: Run the Salesforce Scanner on the code (Apex, LWC, etc.)
-    - name: Run Salesforce Scanner
-      run: |
-        sfdx scanner:run --format sarif --target 'force-app/**/*.cls' \
+      # Step 6: Install the sfdx-git-delta plugin to detect changes in metadata
+      - name: Installing sfdx git delta
+        run: |
+          echo y | sfdx plugins:install sfdx-git-delta
+          sfdx plugins 
+
+      # Step 7: Create delta packages for new, modified, or deleted metadata
+      - name: Create delta packages for new, modified, or deleted metadata
+        run: |
+          mkdir changed-sources
+          sfdx sgd:source:delta --to "HEAD" --from "HEAD^" --output changed-sources/ --generate-delta --source force-app/
+
+      # Step 8: Install Java (required for running tests)
+      - name: Installing java
+        run: sudo apt-get update && sudo apt-get install default-jdk
+
+      # Step 9: Install the SFDX scanner plugin for security and code style checks using npm
+      - name: Installing SFDX scanner
+        run: |
+          npm install @salesforce/sfdx-scanner@latest --save-dev || true  # Using npm to install the scanner
+
+      # Step 10: Run the SFDX scanner to analyze Apex code and generate SARIF report
+      - name: Scan code
+        run: sfdx scanner:run --format sarif --target 'changed-sources/**/*.cls' \
           --category 'Security,Code Style,Performance,Best Practices,Design' \
           --outfile 'apexScanResults.sarif'
 
-    # Step 7: Upload SARIF file as an artifact
-    - name: Upload SARIF file
-      uses: github/codeql-action/upload-sarif@v1
-      with:
-        sarif_file: apexScanResults.sarif
+      # Step 11: Upload SARIF file for further processing (e.g., code quality reports)
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: changed-sources/apexScanResults.sarif
+
+      # Step 12: Run tests for deployment if APEX_TESTS is defined and not equal to 'all'
+      - name: Deployment - run specified tests
+        if: ${{ env.APEX_TESTS != 'all' }}
+        run: |
+          echo ${{env.APEX_TESTS}}
+          sfdx force:source:deploy -p "changed-sources/force-app" --checkonly --testlevel RunSpecifiedTests --runtests ${{env.APEX_TESTS}} --json
+
+      # Step 13: Run all tests for deployment if APEX_TESTS is equal to 'all'
+      - name: Deployment - run all tests
+        if: ${{ env.APEX_TESTS == 'all' }}
+        run: |
+          echo ${{env.APEX_TESTS}}
+          sfdx force:source:deploy -p "changed-sources/force-app" --checkonly --testlevel RunLocalTests --json
